@@ -1,0 +1,2 @@
+packer build -only=virtualbox-iso -var 'mirror=/Users/i838855/Downloads' sles-12-sp1-x86_64.json
+packer build -only=virtualbox-iso -var 'mirror=/Users/i838855/Projects/packer/iso' sles-12-sp1-x86_64.json

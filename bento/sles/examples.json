@@ -1,0 +1,87 @@
+{
+  "description": "SuSE Linux Enterprise 12 Minimal",
+  "variables": {
+    "http_proxy": "{{env `http_proxy`}}",
+    "https_proxy": "{{env `https_proxy`}}"
+  },
+  "provisioners": [
+    {
+      "environment_vars": [
+        "http_proxy={{user `http_proxy`}}",
+        "https_proxy={{user `https_proxy`}}",
+        "no_proxy={{user `no_proxy`}}"
+      ],
+      "type": "shell",
+      "execute_command": "echo 'vagrant'|sudo -S sh '{{.Path}}'",
+      "scripts": [
+        "scripts/linux/suse-postinstall.sh"
+      ]
+    },
+    {
+      "type": "shell",
+      "execute_command": "echo 'vagrant'|sudo -S sh '{{.Path}}'",
+      "script": "scripts/linux/virtualbox.sh"
+    },
+    {
+      "type": "shell",
+      "execute_command": "echo 'vagrant'|sudo -S sh '{{.Path}}'",
+      "scripts": [
+        "scripts/linux/suse-cleanup.sh"
+      ]
+    }
+  ],
+  "builders": [
+    {
+      "type": "virtualbox-iso",
+      "boot_command": [
+        "<esc><enter><wait>",
+        "linux netdevice=eth0 netsetup=dhcp install=cd:/<wait>",
+        " lang=en_US autoyast=http://{{ .HTTPIP }}:{{ .HTTPPort }}/sles_autoinst.xml<wait>",
+        " textmode=1<wait>",
+        "<enter><wait>"
+      ],
+      "boot_wait": "10s",
+      "disk_size": 50000,
+      "guest_os_type": "OpenSUSE_64",
+      "http_directory": "http",
+      "iso_checksum": "21ca19898f20866272b8656df82a945e",
+      "iso_checksum_type": "md5",
+      "iso_url": "/Users/i838855/Downloads/SLE-12-SP1-Server-DVD-x86_64-GM-DVD1.iso",
+      "ssh_username": "vagrant",
+      "ssh_password": "vagrant",
+      "ssh_port": 22,
+      "ssh_wait_timeout": "10000s",
+      "shutdown_command": "echo 'vagrant' | sudo -S /sbin/halt -h -p",
+      "guest_additions_path": "VBoxGuestAdditions_{{.Version}}.iso",
+      "virtualbox_version_file": ".vbox_version",
+      "vm_name": "mySuseVM",
+      "vboxmanage": [
+        [
+          "modifyvm",
+          "{{.Name}}",
+          "--memory",
+          "1024"
+        ],
+        [
+          "modifyvm",
+          "{{.Name}}",
+          "--cpus",
+          "1"
+        ]
+      ],
+      "headless": "false"
+    }
+  ],
+  "post-processors": [
+    {
+      "type": "compress",
+      "output": "/Users/i838855/Projects/packer/images/mySuseVM.tar.gz",
+      "only": ["virtualbox-iso"]
+    },
+    {
+      "type": "vagrant",
+      "output": "/Users/i838855/Projects/packer/images/{{.Provider}}-mySuseVM.box",
+      "only": ["virtualbox-iso"]
+    }
+  ]
+}
